@@ -24,13 +24,12 @@ namespace RestHandler.Controllers
 			try
 			{
 				var userId = postFilter.userId;
-				var decryptedTitle = postFilter.title.Replace("%20", " ");
 
-				var filteredPosts = posts.Where(post => post.UserId == userId && post.Title.Contains(decryptedTitle));
+				var filteredPosts = posts.Where(post => post.UserId == userId && post.Title.Contains(postFilter.title));
 
 				if (filteredPosts is null || !filteredPosts.Any())
 				{
-					return NoContent();
+					return NotFound();
 				}
 
 				return Ok(filteredPosts);
