@@ -7,7 +7,7 @@ namespace RestHandler.Controllers
 	[ApiController]
 	public class PostsController : ControllerBase
 	{
-		private readonly IEnumerable<PostResponse> posts;
+		private IEnumerable<PostResponse> posts;
 
 		public PostsController()
 		{
@@ -73,14 +73,12 @@ namespace RestHandler.Controllers
 			{
 				var deletedPost = posts.FirstOrDefault(post => post.Id == id);
 
-				if (deletedPost is null)
+				if (deletedPost is not null)
 				{
-					return NoContent();
+					posts = posts.Where(p => p != deletedPost);
 				}
 
-				//var currentPosts = posts.Where(post => post != deletingPost);
-
-				return Ok(deletedPost);
+				return NotFound();
 			}
 			catch (Exception ex)
 			{
