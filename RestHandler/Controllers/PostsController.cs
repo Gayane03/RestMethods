@@ -60,18 +60,18 @@ namespace RestHandler.Controllers
 
 
 		[HttpDelete("{id:int}")]
-		public ActionResult<PostResponse> DeletePost(int id)
+		public ActionResult DeletePost(int id)
 		{
 			try
 			{
 				var deletedPost = posts.FirstOrDefault(post => post.Id == id);
-
-				if (deletedPost is not null)
+				if (deletedPost is null)
 				{
-					posts = posts.Where(p => p != deletedPost);
+					return NotFound();
 				}
 
-				return NotFound();
+				posts = posts.Where(p => p != deletedPost);
+				return NoContent();
 			}
 			catch (Exception ex)
 			{
