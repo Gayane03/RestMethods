@@ -3,7 +3,6 @@ using RestHandler.Models;
 
 namespace RestHandler.Controllers
 {
-	[Route("api/users")]
 	[ApiController]
 	public class UsersController : ControllerBase
 	{
@@ -11,7 +10,6 @@ namespace RestHandler.Controllers
 		[HttpPost]
 		public ActionResult<UserPaginationResponse> PostUsers([FromBody] IEnumerable<UserRequest> usersRequest)
 		{
-			int i = 0;
 			try
 			{
 				var userPaginationResponse = new UserPaginationResponse
@@ -33,9 +31,6 @@ namespace RestHandler.Controllers
 				{
 					userPaginationResponse.Data.Add(new User() { Id = ++i, Email = user.Email , FirstName = user.FirstName, LastName = user.LastName,Avatar = user.Avatar });
 				}
-
-				return CreatedAtAction(nameof(PostUsers), userPaginationResponse);
-			}
 			catch (Exception)
 			{
 				return StatusCode(500, "An unexpected error occurred. Please try again later.");
@@ -46,19 +41,8 @@ namespace RestHandler.Controllers
 		[HttpPut("{id:int}")]
 		public ActionResult<UserResponse> PutUser(int id, [FromBody] UserRequest userRequest)
 		{
-		
-			List<User> users =  new List<User>() {
-		        	new User { Id = 1, Email = "george.bluth@reqres.in", FirstName = "George", LastName = "Bluth", Avatar = "https://reqres.in/img/faces/1-image.jpg" },
-					new User { Id = 2, Email = "janet.weaver@reqres.in", FirstName = "Janet", LastName = "Weaver", Avatar = "https://reqres.in/img/faces/2-image.jpg" },
-					new User { Id = 3, Email = "emma.wong@reqres.in", FirstName = "Emma", LastName = "Wong", Avatar = "https://reqres.in/img/faces/3-image.jpg" },
-					new User { Id = 4, Email = "eve.holt@reqres.in", FirstName = "Eve", LastName = "Holt", Avatar = "https://reqres.in/img/faces/4-image.jpg" },
-					new User { Id = 5, Email = "charles.morris@reqres.in", FirstName = "Charles", LastName = "Morris", Avatar = "https://reqres.in/img/faces/5-image.jpg" },
-					new User { Id = 6, Email = "tracey.ramos@reqres.in", FirstName = "Tracey", LastName = "Ramos", Avatar = "https://reqres.in/img/faces/6-image.jpg" }
-			};	
-
 			try
 			{
-				
 				var user = users.FirstOrDefault(user => user.Id == id);
 
 				if(user is null)
