@@ -4,8 +4,43 @@ using RestHandler.Models;
 namespace RestHandler.Controllers
 {
 	[ApiController]
+	[Route("api/[controller]")]
 	public class UsersController : ControllerBase
 	{
+		private List<User> users;
+
+		public UsersController()
+		{
+			users = new List<User>() {
+					new User { Id = 1, Email = "george.bluth@reqres.in", FirstName = "George", LastName = "Bluth", Avatar = "https://reqres.in/img/faces/1-image.jpg" },
+					new User { Id = 2, Email = "janet.weaver@reqres.in", FirstName = "Janet", LastName = "Weaver", Avatar = "https://reqres.in/img/faces/2-image.jpg" },
+					new User { Id = 3, Email = "emma.wong@reqres.in", FirstName = "Emma", LastName = "Wong", Avatar = "https://reqres.in/img/faces/3-image.jpg" },
+					new User { Id = 4, Email = "eve.holt@reqres.in", FirstName = "Eve", LastName = "Holt", Avatar = "https://reqres.in/img/faces/4-image.jpg" },
+					new User { Id = 5, Email = "charles.morris@reqres.in", FirstName = "Charles", LastName = "Morris", Avatar = "https://reqres.in/img/faces/5-image.jpg" },
+					new User { Id = 6, Email = "tracey.ramos@reqres.in", FirstName = "Tracey", LastName = "Ramos", Avatar = "https://reqres.in/img/faces/6-image.jpg" }
+			};
+		}
+
+		[HttpGet("{id:int}")]
+		public ActionResult<User> GetUser(int id)
+		{
+			try
+			{
+				var user = users.FirstOrDefault(post => post.Id == id);
+				if (user is null)
+				{
+					return NotFound();
+				}
+
+				return user;
+			}
+			catch (Exception ex)
+			{
+				return StatusCode(500, "An unexpected error occurred. Please try again later.");
+			}
+		}
+
+
 
 		[HttpPost]
 		public ActionResult<UserPaginationResponse> PostUsers([FromBody] IEnumerable<UserRequest> usersRequest)
