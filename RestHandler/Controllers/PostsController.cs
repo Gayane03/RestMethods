@@ -44,12 +44,10 @@ namespace RestHandler.Controllers
 		{
 			try
 			{
-
-				var filteredPosts = posts.Where(post => post.Id == id);
-
-				if (filteredPosts is null || !filteredPosts.Any())
+				var filteredPosts = posts.FirstOrDefault(post => post.Id == id);
+				if (filteredPosts is null)
 				{
-					return NoContent();
+					return NotFound();
 				}
 
 				return Ok(filteredPosts);
