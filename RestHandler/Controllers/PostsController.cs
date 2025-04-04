@@ -66,7 +66,7 @@ namespace RestHandler.Controllers
 			{
 				var deletedPost = posts.FirstOrDefault(post => post.Id == id);
 				if (deletedPost is null)
-				{
+				{					
 					return NotFound();
 				}
 
