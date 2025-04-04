@@ -43,17 +43,29 @@ namespace RestHandler.Controllers
 
 
 		[HttpPost]
-		public ActionResult<UserPaginationResponse> PostUsers([FromBody] IEnumerable<UserRequest> usersRequest)
+		public ActionResult<UserPaginationResponse> PostUsers([FromBody] UserRequest userRequest)
 		{
 			try
 			{
+				var usersCount = users.Count;
+				var newUser = new User()
+				{
+					Id = ++usersCount,
+					Email = userRequest.Email,
+					FirstName = userRequest.FirstName,
+					LastName = userRequest.LastName,
+					Avatar = userRequest.Avatar
+				};
+
+				users.Add(newUser);
+
 				var userPaginationResponse = new UserPaginationResponse
-				{  
+				{
 					Page = 1,
 					PerPage = 6,
 					Total = 12,
 					TotalPages = 2,
-					Data = new List<User>(),
+					Data = users,
 					Support = new Support
 					{
 						Url = "https://contentcaddy.io?utm_source=reqres&utm_medium=json&utm_campaign=referral",
@@ -61,11 +73,8 @@ namespace RestHandler.Controllers
 					}
 				};
 
-
-				foreach (var user in usersRequest)
-				{
-					userPaginationResponse.Data.Add(new User() { Id = ++i, Email = user.Email , FirstName = user.FirstName, LastName = user.LastName,Avatar = user.Avatar });
-				}
+				return CreatedAtAction(nameof(GetUser) , new { id = newUser.Id } , userPaginationResponse);
+			}
 			catch (Exception)
 			{
 				return StatusCode(500, "An unexpected error occurred. Please try again later.");
@@ -74,15 +83,28 @@ namespace RestHandler.Controllers
 
 
 		[HttpPut("{id:int}")]
-		public ActionResult<UserResponse> PutUser(int id, [FromBody] UserRequest userRequest)
+		public ActionResult PutUser(int id, [FromBody] UserRequest userRequest)
 		{
 			try
 			{
 				var user = users.FirstOrDefault(user => user.Id == id);
 
-				if(user is null)
+				if (user is null)
 				{
+					var usersCount = users.Count;
+					var newUser = new User()
+					{
+						Id = ++usersCount,
+						Email = userRequest.Email,
+						FirstName = userRequest.FirstName,
+						LastName = userRequest.LastName,
+						Avatar = userRequest.Avatar
+					};
+					users.Add(newUser);
+
 					return NoContent();
+					//can return CreatedAtAction(nameof(GetUser), new { id = newUser.Id }, newUser); 
+					// because when there is no resource for the current request, the PUT method should create it
 				}
 
 				user.Email = userRequest.Email;
@@ -100,9 +122,9 @@ namespace RestHandler.Controllers
 					}
 				};
 
-				return Ok(userResponse);
+				return Ok();
 			}
-			catch (Exception)
+			catch (Exception ex)
 			{
 				return StatusCode(500, "An unexpected error occurred. Please try again later.");
 			}
