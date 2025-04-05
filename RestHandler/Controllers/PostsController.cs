@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using RestHandler.ClientServices;
+using RestHandler.Helper;
 using RestHandler.Models;
 
 namespace RestHandler.Controllers
@@ -7,30 +9,30 @@ namespace RestHandler.Controllers
 	[Route("api/[controller]")]
 	public class PostsController : ControllerBase
 	{
-		private IEnumerable<PostResponse> posts;
 
-		public PostsController()
+		private readonly IPostsClientService postsClientService;
+		private readonly IResponseMessageUtile responseMessageUtile;
+
+		public PostsController(IPostsClientService postsClientService, IResponseMessageUtile responseMessageUtile)
 		{
-			posts = new List<PostResponse>() {
-			   new PostResponse{UserId = 1, Id = 1, Title ="qui est esse", Body="est rerum tempore vitae\nsequi sint nihil reprehenderit dolor beatae ea dolores neque\nfugiat blanditiis voluptate porro vel nihil molestiae ut reiciendis\nqui aperiam non debitis possimus qui neque nisi nulla" },
-			   new PostResponse{UserId = 2, Id = 2, Title ="qui est esse", Body="est rerum tempore vitae\nsequi sint nihil reprehenderit dolor beatae ea possimus qui neque nisi nulla" },
-			   new PostResponse{UserId = 1, Id = 3, Title ="ea molestias quasi exercitationem repellat qui ipsa sit aut", Body="et iusto sed quo iure\nvoluptatem occaecati omnis eligendi aut ad\nvoluptatem doloribus vel accusantium quis pariatur\nmolestiae porro eius odio et labore et velit aut" },};
+			this.postsClientService = postsClientService;	
+			this.responseMessageUtile = responseMessageUtile;	
 		}
 
 		[HttpGet]
-		public ActionResult<IEnumerable<PostResponse>> GetPosts([FromQuery] PostFilter postFilter)
+		public async Task<ActionResult<IEnumerable<PostResponse>>> GetPosts([FromQuery] PostFilter postFilter)
 		{
 			try
 			{
-				var userId = postFilter.userId;
+				var response = await postsClientService.GetPostsWithFilter(postFilter);
+				var (result, error) = await responseMessageUtile.HandleResponse<IEnumerable<PostResponse>>(response);
 
-				var filteredPosts = posts.Where(post => post.UserId == userId && post.Title.Contains(postFilter.title));
-				if (filteredPosts is null || !filteredPosts.Any())
+				if (error is not null)
 				{
-					return NotFound();
+					return StatusCode((int)response.StatusCode,error);
 				}
 
-				return Ok(filteredPosts);
+				return Ok(result);
 			}
 			catch (Exception ex)
 			{
@@ -40,17 +42,19 @@ namespace RestHandler.Controllers
 
 
 		[HttpGet("{id:int}")]
-		public ActionResult<PostResponse> GetPost(int id)
+		public async Task<ActionResult<PostResponse>> GetPost(int id)
 		{
 			try
 			{
-				var filteredPosts = posts.FirstOrDefault(post => post.Id == id);
-				if (filteredPosts is null)
+				var response = await postsClientService.GetPost(id);
+				var (result, error) = await responseMessageUtile.HandleResponse<PostResponse>(response);
+
+				if (error is not null)
 				{
-					return NotFound();
+					return StatusCode((int)response.StatusCode, error);
 				}
 
-				return Ok(filteredPosts);
+				return Ok(result);
 			}
 			catch (Exception ex)
 			{
@@ -60,18 +64,12 @@ namespace RestHandler.Controllers
 
 
 		[HttpDelete("{id:int}")]
-		public ActionResult DeletePost(int id)
+		public async Task<ActionResult> DeletePost(int id)
 		{
 			try
 			{
-				var deletedPost = posts.FirstOrDefault(post => post.Id == id);
-				if (deletedPost is null)
-				{					
-					return NotFound();
-				}
-
-				posts = posts.Where(p => p != deletedPost);
-				return NoContent();
+				var response = await postsClientService.DeletePost(id);		
+				return StatusCode((int)response.StatusCode);			
 			}
 			catch (Exception ex)
 			{

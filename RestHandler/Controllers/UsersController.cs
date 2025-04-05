@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using RestHandler.ClientServices;
+using RestHandler.Helper;
 using RestHandler.Models;
 
 namespace RestHandler.Controllers
@@ -7,32 +9,29 @@ namespace RestHandler.Controllers
 	[Route("api/[controller]")]
 	public class UsersController : ControllerBase
 	{
-		private List<User> users;
+		private readonly IUsersClientService usersClientService;
+		private readonly IResponseMessageUtile responseMessageUtile;
 
-		public UsersController()
+		public UsersController(IUsersClientService usersClientService, IResponseMessageUtile responseMessageUtile)
 		{
-			users = new List<User>() {
-					new User { Id = 1, Email = "george.bluth@reqres.in", FirstName = "George", LastName = "Bluth", Avatar = "https://reqres.in/img/faces/1-image.jpg" },
-					new User { Id = 2, Email = "janet.weaver@reqres.in", FirstName = "Janet", LastName = "Weaver", Avatar = "https://reqres.in/img/faces/2-image.jpg" },
-					new User { Id = 3, Email = "emma.wong@reqres.in", FirstName = "Emma", LastName = "Wong", Avatar = "https://reqres.in/img/faces/3-image.jpg" },
-					new User { Id = 4, Email = "eve.holt@reqres.in", FirstName = "Eve", LastName = "Holt", Avatar = "https://reqres.in/img/faces/4-image.jpg" },
-					new User { Id = 5, Email = "charles.morris@reqres.in", FirstName = "Charles", LastName = "Morris", Avatar = "https://reqres.in/img/faces/5-image.jpg" },
-					new User { Id = 6, Email = "tracey.ramos@reqres.in", FirstName = "Tracey", LastName = "Ramos", Avatar = "https://reqres.in/img/faces/6-image.jpg" }
-			};
+			this.usersClientService = usersClientService;
+			this.responseMessageUtile = responseMessageUtile;
 		}
 
 		[HttpGet("{id:int}")]
-		public ActionResult<User> GetUser(int id)
+		public async Task<ActionResult<UserResponse>> GetUser(int id)
 		{
 			try
 			{
-				var user = users.FirstOrDefault(post => post.Id == id);
-				if (user is null)
+				var response = await usersClientService.GetUser(id);
+				var (result, error) = await responseMessageUtile.HandleResponse<UserResponse>(response);
+
+				if (error is not null)
 				{
-					return NotFound();
+					return StatusCode((int)response.StatusCode, error);
 				}
 
-				return user;
+				return Ok(result);
 			}
 			catch (Exception ex)
 			{
@@ -40,40 +39,20 @@ namespace RestHandler.Controllers
 			}
 		}
 
-
-
 		[HttpPost]
-		public ActionResult<UserPaginationResponse> PostUsers([FromBody] UserRequest userRequest)
+		public async Task<ActionResult<UserPaginationResponse>> PostUsers([FromBody] UserRequest userRequest)
 		{
 			try
 			{
-				var usersCount = users.Count;
-				var newUser = new User()
+				var response = await usersClientService.PostUser(userRequest);
+				var (result, error) = await responseMessageUtile.HandleResponse<UserPaginationResponse>(response);
+
+				if (error is not null)
 				{
-					Id = ++usersCount,
-					Email = userRequest.Email,
-					FirstName = userRequest.FirstName,
-					LastName = userRequest.LastName,
-					Avatar = userRequest.Avatar
-				};
+					return StatusCode((int)response.StatusCode, error);
+				}
 
-				users.Add(newUser);
-
-				var userPaginationResponse = new UserPaginationResponse
-				{
-					Page = 1,
-					PerPage = 6,
-					Total = 12,
-					TotalPages = 2,
-					Data = users,
-					Support = new Support
-					{
-						Url = "https://contentcaddy.io?utm_source=reqres&utm_medium=json&utm_campaign=referral",
-						Text = "Tired of writing endless social media content? Let Content Caddy generate it for you."
-					}
-				};
-
-				return CreatedAtAction(nameof(GetUser) , new { id = newUser.Id } , userPaginationResponse);
+				return CreatedAtAction(nameof(GetUser),result);
 			}
 			catch (Exception)
 			{
@@ -83,46 +62,12 @@ namespace RestHandler.Controllers
 
 
 		[HttpPut("{id:int}")]
-		public ActionResult PutUser(int id, [FromBody] UserRequest userRequest)
+		public async Task<ActionResult<UserResponse>> PutUser(int id, [FromBody] UserRequest userRequest)
 		{
 			try
 			{
-				var user = users.FirstOrDefault(user => user.Id == id);
-
-				if (user is null)
-				{
-					var usersCount = users.Count;
-					var newUser = new User()
-					{
-						Id = ++usersCount,
-						Email = userRequest.Email,
-						FirstName = userRequest.FirstName,
-						LastName = userRequest.LastName,
-						Avatar = userRequest.Avatar
-					};
-					users.Add(newUser);
-
-					return NoContent();
-					//can return CreatedAtAction(nameof(GetUser), new { id = newUser.Id }, newUser); 
-					// because when there is no resource for the current request, the PUT method should create it
-				}
-
-				user.Email = userRequest.Email;
-				user.FirstName = userRequest.FirstName;
-				user.LastName = userRequest.LastName;
-				user.Avatar = userRequest.Avatar;
-
-				var userResponse = new UserResponse
-				{
-					Data = user,
-					Support = new Support
-					{
-						Url = "https://contentcaddy.io?utm_source=reqres&utm_medium=json&utm_campaign=referral",
-						Text = "Tired of writing endless social media content? Let Content Caddy generate it for you."
-					}
-				};
-
-				return Ok();
+				var response = await usersClientService.PutUser(id, userRequest);
+				return StatusCode((int)response.StatusCode);
 			}
 			catch (Exception ex)
 			{
