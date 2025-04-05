@@ -71,7 +71,7 @@ namespace RestHandler.Controllers
 				}
 
 				posts = posts.Where(p => p != deletedPost);
-				return NoContent();
+				return Ok();
 			}
 			catch (Exception ex)
 			{
