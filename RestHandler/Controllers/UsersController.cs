@@ -90,21 +90,8 @@ namespace RestHandler.Controllers
 				var user = users.FirstOrDefault(user => user.Id == id);
 
 				if (user is null)
-				{
-					var usersCount = users.Count;
-					var newUser = new User()
-					{
-						Id = ++usersCount,
-						Email = userRequest.Email,
-						FirstName = userRequest.FirstName,
-						LastName = userRequest.LastName,
-						Avatar = userRequest.Avatar
-					};
-					users.Add(newUser);
-
-					return NoContent();
-					//can return CreatedAtAction(nameof(GetUser), new { id = newUser.Id }, newUser); 
-					// because when there is no resource for the current request, the PUT method should create it
+				{				
+					return BadRequest();					
 				}
 
 				user.Email = userRequest.Email;
@@ -112,15 +99,15 @@ namespace RestHandler.Controllers
 				user.LastName = userRequest.LastName;
 				user.Avatar = userRequest.Avatar;
 
-				var userResponse = new UserResponse
-				{
-					Data = user,
-					Support = new Support
-					{
-						Url = "https://contentcaddy.io?utm_source=reqres&utm_medium=json&utm_campaign=referral",
-						Text = "Tired of writing endless social media content? Let Content Caddy generate it for you."
-					}
-				};
+				//var userResponse = new UserResponse
+				//{
+				//	Data = user,
+				//	Support = new Support
+				//	{
+				//		Url = "https://contentcaddy.io?utm_source=reqres&utm_medium=json&utm_campaign=referral",
+				//		Text = "Tired of writing endless social media content? Let Content Caddy generate it for you."
+				//	}
+				//};
 
 				return Ok();
 			}

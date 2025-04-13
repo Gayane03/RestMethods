@@ -65,13 +65,12 @@ namespace RestHandler.Controllers
 			try
 			{
 				var deletedPost = posts.FirstOrDefault(post => post.Id == id);
-				if (deletedPost is null)
-				{					
-					return NotFound();
+				if (deletedPost is not null)
+				{
+					posts = posts.Where(p => p != deletedPost);
 				}
-
-				posts = posts.Where(p => p != deletedPost);
-				return Ok();
+				
+				return NoContent();
 			}
 			catch (Exception ex)
 			{
