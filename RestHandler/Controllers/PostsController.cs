@@ -3,19 +3,18 @@ using RestHandler.Models;
 
 namespace RestHandler.Controllers
 {
-	[Route("api/posts")]
 	[ApiController]
+	[Route("api/[controller]")]
 	public class PostsController : ControllerBase
 	{
-		private readonly IEnumerable<PostResponse> posts;
+		private IEnumerable<PostResponse> posts;
 
 		public PostsController()
 		{
 			posts = new List<PostResponse>() {
 			   new PostResponse{UserId = 1, Id = 1, Title ="qui est esse", Body="est rerum tempore vitae\nsequi sint nihil reprehenderit dolor beatae ea dolores neque\nfugiat blanditiis voluptate porro vel nihil molestiae ut reiciendis\nqui aperiam non debitis possimus qui neque nisi nulla" },
 			   new PostResponse{UserId = 2, Id = 2, Title ="qui est esse", Body="est rerum tempore vitae\nsequi sint nihil reprehenderit dolor beatae ea possimus qui neque nisi nulla" },
-			   new PostResponse{UserId = 1, Id = 3, Title ="ea molestias quasi exercitationem repellat qui ipsa sit aut", Body="et iusto sed quo iure\nvoluptatem occaecati omnis eligendi aut ad\nvoluptatem doloribus vel accusantium quis pariatur\nmolestiae porro eius odio et labore et velit aut" },
-				};
+			   new PostResponse{UserId = 1, Id = 3, Title ="ea molestias quasi exercitationem repellat qui ipsa sit aut", Body="et iusto sed quo iure\nvoluptatem occaecati omnis eligendi aut ad\nvoluptatem doloribus vel accusantium quis pariatur\nmolestiae porro eius odio et labore et velit aut" },};
 		}
 
 		[HttpGet]
@@ -24,13 +23,11 @@ namespace RestHandler.Controllers
 			try
 			{
 				var userId = postFilter.userId;
-				var decryptedTitle = postFilter.title.Replace("%20", " ");
 
-				var filteredPosts = posts.Where(post => post.UserId == userId && post.Title.Contains(decryptedTitle));
-
+				var filteredPosts = posts.Where(post => post.UserId == userId && post.Title.Contains(postFilter.title));
 				if (filteredPosts is null || !filteredPosts.Any())
 				{
-					return NoContent();
+					return NotFound();
 				}
 
 				return Ok(filteredPosts);
@@ -39,7 +36,6 @@ namespace RestHandler.Controllers
 			{
 				return StatusCode(500, "An unexpected error occurred. Please try again later.");
 			}
-
 		}
 
 
@@ -48,12 +44,10 @@ namespace RestHandler.Controllers
 		{
 			try
 			{
-
-				var filteredPosts = posts.Where(post => post.Id == id);
-
-				if (filteredPosts is null || !filteredPosts.Any())
+				var filteredPosts = posts.FirstOrDefault(post => post.Id == id);
+				if (filteredPosts is null)
 				{
-					return NoContent();
+					return NotFound();
 				}
 
 				return Ok(filteredPosts);
@@ -62,31 +56,26 @@ namespace RestHandler.Controllers
 			{
 				return StatusCode(500, "An unexpected error occurred. Please try again later.");
 			}
-
 		}
 
 
 		[HttpDelete("{id:int}")]
-		public ActionResult<PostResponse> DeletePost(int id)
+		public ActionResult DeletePost(int id)
 		{
 			try
 			{
 				var deletedPost = posts.FirstOrDefault(post => post.Id == id);
-
-				if (deletedPost is null)
+				if (deletedPost is not null)
 				{
-					return NoContent();
+					posts = posts.Where(p => p != deletedPost);
 				}
-
-				//var currentPosts = posts.Where(post => post != deletingPost);
-
-				return Ok(deletedPost);
+				
+				return NoContent();
 			}
 			catch (Exception ex)
 			{
 				return StatusCode(500, "An unexpected error occurred. Please try again later.");
 			}
-
 		}
 	}
 }
