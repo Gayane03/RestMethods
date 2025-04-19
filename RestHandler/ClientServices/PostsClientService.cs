@@ -7,29 +7,33 @@ namespace RestHandler.ClientServices
 	public class PostsClientService : IPostsClientService
 	{
 		private readonly HttpClient httpClient;
-
-		public PostsClientService(IHttpClientFactory httpClientFactory)
+		private readonly IResponseMessageUtile responseMessageUtile;
+		public PostsClientService(IHttpClientFactory httpClientFactory, IResponseMessageUtile responseMessageUtile)
 		{
 			this.httpClient = httpClientFactory.CreateClient(BackendApi.Posts);
+			this.responseMessageUtile = responseMessageUtile;
 		}
 
-		public async Task<HttpResponseMessage> GetPostsWithFilter(PostFilter postFilter)
+		public async Task<(T, string)> GetPostsWithFilter<T>(PostFilter postFilter)
 		{
 			var uri = "posts".SetQueryParams(postFilter);
-			return await httpClient.GetAsync(uri);
+			var response = await httpClient.GetAsync(uri);
+
+			return await responseMessageUtile.HandleResponse<T>(response);
 		}
 
-		public async Task<HttpResponseMessage> GetPost(int id)
+		public async Task<(T, string)> GetPost<T>(int id)
 		{
 			var uri = $"posts/{id}";
-			return await httpClient.GetAsync(uri);
+			var response = await httpClient.GetAsync(uri);
+
+			return await responseMessageUtile.HandleResponse<T>(response);
 		}
 
-		public async Task<HttpResponseMessage> DeletePost(int id)
+		public async Task DeletePost(int id)
 		{
 			var uri = $"posts/{id}";
-			return await httpClient.DeleteAsync(uri);
+			await httpClient.DeleteAsync(uri);
 		}
-
 	}
 }

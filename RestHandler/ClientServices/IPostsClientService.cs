@@ -4,8 +4,8 @@ namespace RestHandler.ClientServices
 {
 	public interface IPostsClientService
 	{
-	    Task<HttpResponseMessage> GetPostsWithFilter(PostFilter postFilter);
-		Task<HttpResponseMessage> GetPost(int id);
-		Task<HttpResponseMessage> DeletePost(int id);
+	    Task<(T,string)> GetPostsWithFilter<T>(PostFilter postFilter);
+		Task<(T, string)> GetPost<T>(int id);
+		Task DeletePost(int id);
 	}
 }

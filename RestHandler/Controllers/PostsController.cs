@@ -11,12 +11,10 @@ namespace RestHandler.Controllers
 	{
 
 		private readonly IPostsClientService postsClientService;
-		private readonly IResponseMessageUtile responseMessageUtile;
 
 		public PostsController(IPostsClientService postsClientService, IResponseMessageUtile responseMessageUtile)
 		{
 			this.postsClientService = postsClientService;	
-			this.responseMessageUtile = responseMessageUtile;	
 		}
 
 		[HttpGet]
@@ -24,15 +22,14 @@ namespace RestHandler.Controllers
 		{
 			try
 			{
-				var response = await postsClientService.GetPostsWithFilter(postFilter);
-				var (result, error) = await responseMessageUtile.HandleResponse<IEnumerable<PostResponse>>(response);
+				var (response, error) = await postsClientService.GetPostsWithFilter<IEnumerable<PostResponse>>(postFilter);
 
 				if (error is not null)
 				{
-					return StatusCode((int)response.StatusCode,error);
+					return NotFound(error);
 				}
 
-				return Ok(result);
+				return Ok(response);
 			}
 			catch (Exception ex)
 			{
@@ -46,15 +43,14 @@ namespace RestHandler.Controllers
 		{
 			try
 			{
-				var response = await postsClientService.GetPost(id);
-				var (result, error) = await responseMessageUtile.HandleResponse<PostResponse>(response);
+				var (response, error) = await postsClientService.GetPost<PostResponse>(id);
 
 				if (error is not null)
 				{
-					return StatusCode((int)response.StatusCode, error);
+					return NotFound(error);
 				}
 
-				return Ok(result);
+				return Ok(response);
 			}
 			catch (Exception ex)
 			{
@@ -68,8 +64,8 @@ namespace RestHandler.Controllers
 		{
 			try
 			{
-				var response = await postsClientService.DeletePost(id);		
-				return StatusCode((int)response.StatusCode);			
+				await postsClientService.DeletePost(id);		
+				return NoContent();			
 			}
 			catch (Exception ex)
 			{
