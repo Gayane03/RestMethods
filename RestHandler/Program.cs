@@ -1,4 +1,6 @@
+using Microsoft.Extensions.Options;
 using RestHandler.ClientServices;
+using RestHandler.Configurations;
 using RestHandler.Helper;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,19 +12,19 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddHttpClient<PostsClientService>(BackendApi.Posts, client =>
+builder.Services.Configure<ApiUrls>(builder.Configuration.GetSection("ApiUrls"));
+
+builder.Services.AddHttpClient<IPostsClientService,PostsClientService>((provider, client) =>
 {
-	client.BaseAddress = new Uri(builder.Configuration.GetSection("ApiUrls")[BackendApi.Posts]!);
+	var options = provider.GetRequiredService<IOptions<ApiUrls>>();
+	client.BaseAddress = new Uri(options.Value.Posts);
 });
 
-builder.Services.AddHttpClient<UsersClientService>(BackendApi.Users, client =>
+builder.Services.AddHttpClient<IUsersClientService, UsersClientService>((provider, client) =>
 {
-	client.BaseAddress = new Uri(builder.Configuration.GetSection("ApiUrls")[BackendApi.Users]!);
+	var options = provider.GetRequiredService<IOptions<ApiUrls>>();
+	client.BaseAddress = new Uri(options.Value.Users);
 });
-
-builder.Services.AddScoped<IPostsClientService, PostsClientService>();
-builder.Services.AddScoped<IUsersClientService, UsersClientService>();
-builder.Services.AddScoped<IResponseMessageUtile, ResponseMessageUtile>();
 
 var app = builder.Build();
 

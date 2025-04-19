@@ -12,7 +12,7 @@ namespace RestHandler.Controllers
 
 		private readonly IPostsClientService postsClientService;
 
-		public PostsController(IPostsClientService postsClientService, IResponseMessageUtile responseMessageUtile)
+		public PostsController(IPostsClientService postsClientService)
 		{
 			this.postsClientService = postsClientService;	
 		}

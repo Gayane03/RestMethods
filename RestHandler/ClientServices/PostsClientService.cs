@@ -7,11 +7,9 @@ namespace RestHandler.ClientServices
 	public class PostsClientService : IPostsClientService
 	{
 		private readonly HttpClient httpClient;
-		private readonly IResponseMessageUtile responseMessageUtile;
-		public PostsClientService(IHttpClientFactory httpClientFactory, IResponseMessageUtile responseMessageUtile)
+		public PostsClientService(HttpClient httpClientFactory)
 		{
-			this.httpClient = httpClientFactory.CreateClient(BackendApi.Posts);
-			this.responseMessageUtile = responseMessageUtile;
+			this.httpClient = httpClientFactory;
 		}
 
 		public async Task<(T, string)> GetPostsWithFilter<T>(PostFilter postFilter)
@@ -19,7 +17,7 @@ namespace RestHandler.ClientServices
 			var uri = "posts".SetQueryParams(postFilter);
 			var response = await httpClient.GetAsync(uri);
 
-			return await responseMessageUtile.HandleResponse<T>(response);
+			return await ResponseMessageUtile.HandleResponse<T>(response);
 		}
 
 		public async Task<(T, string)> GetPost<T>(int id)
@@ -27,7 +25,7 @@ namespace RestHandler.ClientServices
 			var uri = $"posts/{id}";
 			var response = await httpClient.GetAsync(uri);
 
-			return await responseMessageUtile.HandleResponse<T>(response);
+			return await ResponseMessageUtile.HandleResponse<T>(response);
 		}
 
 		public async Task DeletePost(int id)

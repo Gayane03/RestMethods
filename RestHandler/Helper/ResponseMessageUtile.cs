@@ -1,8 +1,8 @@
 ﻿namespace RestHandler.Helper
 {
-	public class ResponseMessageUtile : IResponseMessageUtile
+	public static class ResponseMessageUtile 
 	{
-		public async Task<(T? response, string? error)> HandleResponse<T>(HttpResponseMessage? response)
+		public static async Task<(T? response, string? error)> HandleResponse<T>(HttpResponseMessage? response)
 		{
 			string? errorMessage;
 

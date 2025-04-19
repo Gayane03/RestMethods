@@ -7,9 +7,9 @@ namespace RestHandler.ClientServices
 	{
 		private readonly HttpClient httpClient;
 
-		public UsersClientService(IHttpClientFactory httpClientFactory)
+		public UsersClientService(HttpClient httpClientFactory)
 		{
-			this.httpClient = httpClientFactory.CreateClient(BackendApi.Users);
+			this.httpClient = httpClientFactory;
 		}
 
 		public async Task<HttpResponseMessage> GetUser(int id)

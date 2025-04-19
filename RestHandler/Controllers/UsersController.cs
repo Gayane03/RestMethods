@@ -52,7 +52,7 @@ namespace RestHandler.Controllers
 					return StatusCode((int)response.StatusCode, error);
 				}
 
-				return CreatedAtAction(nameof(GetUser),result);
+				return CreatedAtAction(nameof(GetUser), result);
 			}
 			catch (Exception)
 			{
